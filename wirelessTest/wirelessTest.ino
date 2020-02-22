@@ -1,46 +1,45 @@
-const int FLEX_PIN = A0; 
-// Pin connected to voltage divider output
-// Measure the voltage at 5V and the actual resistance of your 
-// 47k resistor, and enter them below. This makes the angle 
-// calculation much more accurate. 
+#include <math.h>
+#include <ArduinoBLE.h>
 
-const float VCC = 4.8;  // Measured voltage of Arduino 5V line 
+BLEService ledService("2fb70000-e6e7-4b12-92fd-c75313df3ce4"); // BLE LED Service
+BLEByteCharacteristic switchCharacteristic("2fb70001-e6e7-4b12-92fd-c75313df3ce4", BLERead | BLEWrite);
+
+const float VCC = 3.3;  // Measured voltage of Arduino 5V line 
 
 const float R_DIV = 51000; // Measured resistance of 47k resistor
-
-// Upload the code and try to determine an average value of 
-// resistance when the sensor is not bent, and when it is 
-// bent at 90 degrees. Enter those and reload the code for 
-// a more accurate angle estimate. 
 
 const float STRAIGHT_RESISTANCE = 11700; // resistance when straight 
 
 const float BEND_RESISTANCE = 20000; // resistance at 90 deg
 
+
+
 void setup() { 
   Serial.begin(9600); // Startup the serial communications at 9600 baud }
+  BLE.begin();                                        // begin initialization
+  BLE.setLocalName("Flex Sensor");                    // define local name
+  BLE.setAdvertisedService(ledService);               // set advertised local name and service UUID:
+  ledService.addCharacteristic(switchCharacteristic); // add the characteristic to the service
+  BLE.addService(ledService);                         // add service
+  switchCharacteristic.writeValue(0);                 // set the initial value for the characeristic:
+  BLE.advertise(); Serial.println("BLE LED Peripheral");
 }
 
 void loop() { 
-  //FLEX SENSOR 1
-  // Read the ADC 
+
   int flexADC = analogRead(A0);
   
-  // Calculate the voltage that the ADC read 
   float flexV = flexADC * VCC / 1023.0;
   
-  // Calculate the resistance of the flex sensor 
+
   float flexR = R_DIV * (VCC / flexV - 1.0);
   
-  // Use the calculated resistance to estimate the sensor's 
-  // bend angle my mapping the measured resistance onto the 
-  // known resistances at zero and ninety degrees of bend. 
   float angle = map(flexR, STRAIGHT_RESISTANCE, BEND_RESISTANCE, 0, 90.0);
-  
-  // Send the results back to the computer formatted as a comma delimited line.
-  Serial.print("FLEX SENSOR 1: ") ; Serial.print(angle); Serial.print(","); Serial.println(flexR);
- // delay(250);
 
+  Serial.print("FLEX SENSOR 1: ") ; Serial.print(angle); Serial.print(","); Serial.println(flexR);
+  delay(500);
+
+/*
    //FLEX SENSOR 2
   flexADC = analogRead(A1);
   flexV = flexADC * VCC / 1023.0;
@@ -75,4 +74,5 @@ void loop() {
 
 
   delay(1000); // Read the sensor at 4Hz.
+  */
 }
