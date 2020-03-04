@@ -16,7 +16,17 @@ void loop() {
   
   if(peripheral){
     Serial.println("Found: " + peripheral.address() + ", " + peripheral.localName() + ", " + peripheral.advertisedServiceUuid());
+    
     BLE.stopScan();
     BLE.scanForUuid("2fb70000-e6e7-4b12-92fd-c75313df3ce4");
   }
+  
+  /*Serial.println("Connecting ...");
+  if (peripheral.connect()){
+    Serial.println("Connected");  
+  }else{
+    Serial.println("Fail");
+  }*/
+
+  
 }
